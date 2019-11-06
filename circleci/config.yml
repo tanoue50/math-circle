@@ -1,0 +1,41 @@
+version: 2
+jobs:
+  build:
+    working_directory: ~/mern-starter
+    # 最初の1行目に指定されたイメージがプライマリコンテナのインスタンスとなります。 ジョブのコマンドはこのコンテナ内で実行されます。
+    docker:
+      - image: circleci/node:4.8.2-jessie
+    # 2 番目に指定されたイメージがセカンダリコンテナのインスタンスとなります。このインスタンスは、ローカルホスト上のプライマリコンテナのポートを通じて共通ネットワークで動作します。
+      - image: mongo:3.4.4-jessie
+    steps:
+      - checkout
+      - run:
+          name: npm のアップデート
+          command: 'sudo npm install -g npm@latest'
+      - restore_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+      - run:
+          name: npm wee のインストール
+          command: npm install
+      - save_cache:
+          key: dependency-cache-{{ checksum "package-lock.json" }}
+          paths:
+            - node_modules
+  test:
+    docker:
+      - image: circleci/node:4.8.2-jessie
+      - image: mongo:3.4.4-jessie
+    steps:
+      - checkout
+      - run:
+          name: テスト
+          command: npm test
+      - run:
+          name: コードカバレッジの生成
+          command: './node_modules/.bin/nyc report --reporter=text-lcov'
+      - store_artifacts:
+          path: test-results.xml
+          prefix: tests
+      - store_artifacts:
+          path: coverage
+          prefix: coverage
