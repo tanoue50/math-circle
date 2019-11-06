@@ -1,7 +1,7 @@
 version: 2
 jobs:
   build:
-    working_directory: ~/mern-starter
+    working_directory: ~/
     # 最初の1行目に指定されたイメージがプライマリコンテナのインスタンスとなります。 ジョブのコマンドはこのコンテナ内で実行されます。
     docker:
       - image: circleci/node:4.8.2-jessie
@@ -21,12 +21,7 @@ jobs:
           key: dependency-cache-{{ checksum "package-lock.json" }}
           paths:
             - node_modules
-  test:
-    docker:
-      - image: circleci/node:4.8.2-jessie
-      - image: mongo:3.4.4-jessie
-    steps:
-      - checkout
+  
       - run:
           name: テスト
           command: npm test
